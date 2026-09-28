@@ -1,0 +1,21 @@
+{
+  "name": "loop-hostd",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/main.ts",
+    "alchemy:dev": "alchemy dev",
+    "alchemy:deploy": "alchemy deploy",
+    "alchemy:destroy": "alchemy destroy"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "alchemy": "^2.0.0-beta.79",
+    "effect": "^3"
+  }
+}
