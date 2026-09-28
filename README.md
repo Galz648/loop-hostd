@@ -54,6 +54,14 @@ Intake file shape:
 Processed files move to `.data/intake/processed/`; failed ones to
 `.data/intake/failed/` with the error recorded on the `runs` row.
 
+### First run in a new repo checkout
+
+Claude Code shows a one-time "do you trust this folder?" dialog the first
+time it's launched in a given directory. That dialog blocks Herdr's
+readiness check (`agent_not_ready`), so the first intake run against a fresh
+`repoRoot` will fail. Run `claude` there once yourself and accept the trust
+prompt — after that it's remembered and headless runs work.
+
 ## Portability
 
 The runner's only environment assumptions are a repo checkout (`repoRoot`)

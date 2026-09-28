@@ -9,6 +9,8 @@ interface IntakeSpec {
   loop: string;
   label?: string;
   kind?: string;
+  /** Extra CLI args forwarded to the agent binary, e.g. ["--model", "haiku"]. */
+  agentArgs?: string[];
 }
 
 function ensureDirs() {
@@ -53,7 +55,7 @@ async function processIntakeFile(fileName: string): Promise<void> {
   try {
     const paneId = await openPane({ cwd: config.repoRoot });
     const agentName = `loop-${run.id}`;
-    await startAgent({ name: agentName, kind: agentKind, paneId });
+    await startAgent({ name: agentName, kind: agentKind, paneId, extraArgs: spec.agentArgs });
     updateRun(fileName, { pane_id: paneId, agent_name: agentName, status: "running" });
 
     await promptAgent({

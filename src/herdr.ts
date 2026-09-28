@@ -54,8 +54,11 @@ export async function startAgent(opts: {
   name: string;
   kind: string;
   paneId: string;
+  extraArgs?: string[];
 }): Promise<void> {
-  await runOrThrow(["agent", "start", opts.name, "--kind", opts.kind, "--pane", opts.paneId]);
+  const args = ["agent", "start", opts.name, "--kind", opts.kind, "--pane", opts.paneId];
+  if (opts.extraArgs?.length) args.push("--", ...opts.extraArgs);
+  await runOrThrow(args);
 }
 
 /** Submit a prompt to an agent and optionally wait for it to settle. */
