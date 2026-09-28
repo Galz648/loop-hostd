@@ -8,7 +8,7 @@ export type RunStatus = "queued" | "starting" | "running" | "done" | "blocked" |
 export interface RunRow {
   id: number;
   intake_file: string;
-  loop_ref: string;
+  prompt: string;
   label: string | null;
   agent_kind: string;
   agent_name: string | null;
@@ -31,7 +31,7 @@ export function openDb(): Database {
     CREATE TABLE IF NOT EXISTS runs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       intake_file TEXT NOT NULL UNIQUE,
-      loop_ref TEXT NOT NULL,
+      prompt TEXT NOT NULL,
       label TEXT,
       agent_kind TEXT NOT NULL,
       agent_name TEXT,
@@ -47,16 +47,16 @@ export function openDb(): Database {
 
 export function insertRun(row: {
   intake_file: string;
-  loop_ref: string;
+  prompt: string;
   label: string | null;
   agent_kind: string;
 }): RunRow {
   const conn = openDb();
   conn
     .query(
-      `INSERT INTO runs (intake_file, loop_ref, label, agent_kind) VALUES (?, ?, ?, ?)`,
+      `INSERT INTO runs (intake_file, prompt, label, agent_kind) VALUES (?, ?, ?, ?)`,
     )
-    .run(row.intake_file, row.loop_ref, row.label, row.agent_kind);
+    .run(row.intake_file, row.prompt, row.label, row.agent_kind);
   return conn
     .query(`SELECT * FROM runs WHERE intake_file = ?`)
     .get(row.intake_file) as RunRow;

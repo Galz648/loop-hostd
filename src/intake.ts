@@ -5,8 +5,8 @@ import { getRunByIntakeFile, insertRun, updateRun } from "./db.ts";
 import { openPane, promptAgent, startAgent, waitForAgent } from "./herdr.ts";
 
 interface IntakeSpec {
-  /** Path (relative to repoRoot) to a loop spec — e.g. a Looper `RUN_IN_SESSION.md` or `loop.yaml`. */
-  loop: string;
+  /** The prompt handed to the agent — a task, a skill invocation, whatever. */
+  prompt: string;
   label?: string;
   kind?: string;
   /** Extra CLI args forwarded to the agent binary, e.g. ["--model", "haiku"]. */
@@ -34,7 +34,7 @@ async function processIntakeFile(fileName: string): Promise<void> {
   let spec: IntakeSpec;
   try {
     spec = JSON.parse(await Bun.file(filePath).text());
-    if (!spec.loop) throw new Error("intake file missing required 'loop' field");
+    if (!spec.prompt) throw new Error("intake file missing required 'prompt' field");
   } catch (err) {
     console.error(`[intake] bad intake file ${fileName}:`, err);
     renameSync(filePath, join(config.intakeFailedDir, fileName));
@@ -44,23 +44,23 @@ async function processIntakeFile(fileName: string): Promise<void> {
   const agentKind = spec.kind ?? config.defaultAgentKind;
   const run = insertRun({
     intake_file: fileName,
-    loop_ref: spec.loop,
+    prompt: spec.prompt,
     label: spec.label ?? null,
     agent_kind: agentKind,
   });
 
-  console.log(`[intake] run ${run.id}: starting agent for ${spec.loop}`);
+  console.log(`[intake] run ${run.id}: starting agent`);
   updateRun(fileName, { status: "starting" });
 
   try {
     const paneId = await openPane({ cwd: config.repoRoot });
-    const agentName = `loop-${run.id}`;
+    const agentName = `run-${run.id}`;
     await startAgent({ name: agentName, kind: agentKind, paneId, extraArgs: spec.agentArgs });
     updateRun(fileName, { pane_id: paneId, agent_name: agentName, status: "running" });
 
     await promptAgent({
       target: agentName,
-      text: `Run the loop defined at ${spec.loop} (repo root: ${config.repoRoot}). Follow its own run instructions.`,
+      text: spec.prompt,
       wait: true,
       until: ["done", "blocked"],
     });

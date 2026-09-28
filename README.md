@@ -1,18 +1,20 @@
 # loop-hostd
 
-Hosts a [Looper](https://github.com/ksimback/looper)-style agent loop on top of
-[Herdr](https://herdr.dev) persistent PTY sessions. Stage 1: local only. See
-`Spec 1 — Hosting (Local, then Remote)` for the full plan.
+Hosts agents on top of [Herdr](https://herdr.dev) persistent PTY sessions,
+driven by dropping intake files with a prompt/skill to run. Stage 1: local
+only. See `Spec 1 — Hosting (Local, then Remote)` for the full plan. (A
+Looper-style designed loop can be a `prompt` later — nothing here assumes
+that shape.)
 
 ## How it works
 
 - `alchemy.run.ts` is the infra program (Alchemy v2): it ensures the local
-  data dirs and a persistent Herdr session exist, then supervises the runner
-  as a `Command.Dev` process (restarts on code change, survives while
+  data dirs exist and a Herdr server is reachable, then supervises the
+  runner as a `Command.Dev` process (restarts on code change, survives while
   `alchemy dev` is up).
 - `src/main.ts` is the runner: it watches `.data/intake/` for JSON intake
   files, and for each one opens a Herdr pane, starts an agent in it, and
-  prompts it to run the referenced loop.
+  sends it the given prompt.
 - `src/db.ts` tracks run state (queued → starting → running → done/blocked/failed)
   in SQLite at `.data/db/loop-hostd.sqlite`.
 - `src/herdr.ts` shells out to the `herdr` CLI (pane/agent control) since
@@ -45,9 +47,10 @@ Intake file shape:
 
 ```json
 {
-  "loop": "path/to/RUN_IN_SESSION.md or loop.yaml",
+  "prompt": "task or /skill-name for the agent to run",
   "label": "optional human label",
-  "kind": "claude"
+  "kind": "claude",
+  "agentArgs": ["--model", "haiku"]
 }
 ```
 

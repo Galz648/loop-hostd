@@ -1,5 +1,6 @@
 {
-  "loop": "RUN_IN_SESSION.md",
+  "prompt": "Run /code-review medium on the current diff.",
   "label": "example run",
-  "kind": "claude"
+  "kind": "claude",
+  "agentArgs": ["--model", "haiku"]
 }
