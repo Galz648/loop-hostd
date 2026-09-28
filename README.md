@@ -6,6 +6,31 @@ only. See `Spec 1 — Hosting (Local, then Remote)` for the full plan. (A
 Looper-style designed loop can be a `prompt` later — nothing here assumes
 that shape.)
 
+## Jargon
+
+- **Intake (file)** — a JSON file you drop in `.data/intake/` to kick off a
+  run. It's the only input surface: no API, no CLI flags per-run, just a
+  file with a `prompt` in it. Named after "intake" as in "intake form" — the
+  thing you fill out to request work.
+- **Run** — one row in the `runs` table: one intake file, one agent, one
+  pane, tracked start to finish (`queued → starting → running →
+  done/blocked/failed`).
+- **Pane** — a Herdr-managed terminal split. Each run gets its own pane so
+  its agent has a real interactive terminal, not a headless subprocess.
+- **Agent** (in the Herdr sense) — an interactive CLI tool (Claude Code,
+  Codex, Gemini, etc.) running inside a pane that Herdr can prompt and poll
+  for state. `kind` in an intake file picks which one (`claude`, `codex`, …).
+- **Runner** — this repo's own long-lived process (`src/main.ts`): watches
+  the intake dir and turns each file into a run.
+- **Stack** (Alchemy sense) — the infra program in `alchemy.run.ts`: the set
+  of resources (dirs, the herdr check, the runner process) Alchemy stands up
+  and supervises.
+- **Loop** — not currently used by this repo. Refers to a
+  [Looper](https://github.com/ksimback/looper)-designed multi-step agent
+  workflow (`loop.yaml`/`RUN_IN_SESSION.md`). Stage 1 only sends a flat
+  `prompt`; a loop could be *one kind* of prompt later, but nothing here
+  assumes that shape yet.
+
 ## How it works
 
 - `alchemy.run.ts` is the infra program (Alchemy v2): it ensures the local
